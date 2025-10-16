@@ -8,15 +8,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
-
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
 
 # Build app for production
 RUN npm run build
-
 
 # ---------------------------
 # Stage 2: Serve with Nginx
@@ -26,7 +24,7 @@ FROM nginx:stable-alpine
 # Copy build output to Nginx web directory
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration
+# Copy custom nginx configuration (adjust path if needed)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port
