@@ -7,6 +7,7 @@ pipeline {
     }
 
     stages {
+
         stage('Clone Repo') {
             steps {
                 echo "Cloning LMS repo..."
@@ -17,20 +18,28 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Building Docker image..."
-                script {
-                    docker.build("${IMAGE_NAME}")
-                }
+                sh """
+                    docker build -t ${IMAGE_NAME} .
+                """
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                echo "Stopping old container if exists..."
+                sh """
+                    docker stop ${CONTAINER_NAME} || true
+                    docker rm ${CONTAINER_NAME} || true
+                """
             }
         }
 
         stage('Run Docker Container') {
             steps {
-                echo "Stopping any existing container..."
-                sh "docker stop ${CONTAINER_NAME} || true"
-                sh "docker rm ${CONTAINER_NAME} || true"
-
                 echo "Running new container on port 80..."
-                sh "docker run -d -p 80:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}"
+                sh """
+                    docker run -d -p 80:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}
+                """
             }
         }
     }
